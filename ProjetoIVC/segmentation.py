@@ -1,13 +1,6 @@
 import cv2
 import numpy as np
 
-#hmin = 30
-#hmax = 85
-#smin = 75
-#smax = 183
-#vmin = 132
-#vmax = 177
-
 hmin = 43
 hmax = 99
 smin = 61
@@ -15,6 +8,8 @@ smax = 160
 vmin = 44
 vmax = 141
 
+
+#funcao responsavel pela segmentacao
 def update_segmentation(image_hsv):
     if hmin < hmax:
         ret, mask_hmin = cv2.threshold(src=image_hsv[:, :, 0], thresh=hmin-1,
@@ -67,25 +62,27 @@ def update_segmentation(image_hsv):
         if contour_area > 100:
             cv2.drawContours(image=mask_filtered, contours=contours,
                              contourIdx=i, color=1,thickness=-1)
-    #cv2.imshow("Mask Filtered", mask_filtered * 255)
+    cv2.imshow("Mask Filtered", mask_filtered * 255)
     return mask_filtered
 
 
+#Encontrar o centro da mascara
 def find_center(mask):
 
     contours, hierarchy = cv2.findContours(image=mask,
                                            mode=cv2.RETR_TREE,
                                            method=cv2.CHAIN_APPROX_NONE)
     if len(contours) > 0:
-        largest_contour = max(contours, key=cv2.contourArea)
+        contour = max(contours, key=cv2.contourArea)
 
-        M = cv2.moments(largest_contour)
+        M = cv2.moments(contour)
         if M['m00'] != 0:
             Cx = int(np.round(M['m10'] / M['m00']))
             Cy = int(np.round(M['m01'] / M['m00']))
             return Cx, Cy
     return None
 
+#Criacao de trackbars
 def trackbar():
     def on_change_hmin(val):
         global hmin

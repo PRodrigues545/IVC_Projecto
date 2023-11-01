@@ -59,7 +59,7 @@ class Ball(pygame.sprite.Sprite):
         It derives from the "Sprite" class in Pygame """
 
     # Speed in pixels per cycle
-    speed = 10.0
+    speed = 4.0
 
     # Floating point representation of where the ball is
     x = 0.0
@@ -140,7 +140,7 @@ class Player(pygame.sprite.Sprite):
         # Call the parent's constructor
         super().__init__()
 
-        self.speed = 10
+        self.speed = 5
         self.width = 75
         self.height = 15
         self.image = pygame.Surface([self.width, self.height])
@@ -155,24 +155,30 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = self.screenheight - self.height
     def update(self, center):
         """ Update the player position. """
+
+        #mexer o player com as setas do teclado
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.rect.x -= self.speed
         if keys[pygame.K_RIGHT]:
             self.rect.x += self.speed
 
-        if self.rect.x < 0:
-            self.rect.x = 0
-        elif self.rect.x + self.width > self.screenwidth:
-            self.rect.x = self.screenwidth - self.width
-        elif center is not None:
-            if 0 <= center <= self.screenwidth:
-                self.rect.x = center
-        else:
-            self.rect.x = self.rect.x
+        #mexer o player com a camara
+        if center is not None:
+            if center < self.screenwidth*(1/3):
+                self.rect.x -= self.speed  # mexer para a esquerda se o ponto(centro) estiver à esquerda
+            elif center > self.screenwidth*(2/3):
+                self.rect.x += self.speed  # mexer para a direita se o ponto(centro) estiver à direita
+            # Obrigar o player a ficar dentro dos limites
+            if self.rect.x < 0:
+                self.rect.x = 0
+            elif self.rect.x + self.width > self.screenwidth:
+                self.rect.x = self.screenwidth - self.width
 
 # Call this function so the Pygame library can initialize itself
 pygame.init()
+
+#segmentacao
 segmentation.trackbar()
 
 # Create an 800x600 sized screen
@@ -232,8 +238,10 @@ game_over = False
 # Exit the program?
 exit_program = False
 
+
 # Main program loop
 while not exit_program:
+    #chamar o loop da camara e encontrar o centro
     center = camara.camara_loop()
 
     # Limit to 30 fps
